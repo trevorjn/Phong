@@ -11,6 +11,9 @@ const GLint WINDOW_WIDTH = 1600;
 const GLint WINDOW_HEIGHT = 900;
 const GLchar* WINDOW_TITLE = "Phong Demo";
 
+const GLchar* LIGHTING_VERTEX_SHADER = "lighting.vert";
+const GLchar* LIGHTING_FRAGMENT_SHADER = "lighting.frag";
+
 // Function prototypes
 void framebufferSizeCallback(GLFWwindow* window, GLint width, GLint height);
 void runRenderLoop(GLFWwindow* window);
@@ -46,6 +49,34 @@ int main()
 	// Set callbacks
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
+	// Define a temporary XY-plane triangle for testing
+	GLfloat vertices[] = {
+		 0.0f,  0.5f, 0.0f,
+		-0.5f, -0.5f, 0.0f,
+		 0.5f, -0.5f, 0.0f
+	};
+
+	// Create a vertex array object and bind it to the OpenGL context
+	GLuint VAO;
+	glCreateVertexArrays(1, &VAO);
+	glBindVertexArray(VAO);
+
+	// Create a vertex buffer object and bind it to the ARRAY_BUFFER target
+	GLuint VBO;
+	glCreateBuffers(1, &VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+	// Buffer vertices to GPU
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	// Configure vertex attributes
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	// Create and use shader object
+	Shader lightingShader(LIGHTING_VERTEX_SHADER, LIGHTING_FRAGMENT_SHADER);
+	lightingShader.use();
+
 	// Loop until GLFW window is told to close
 	runRenderLoop(window);
 
@@ -61,6 +92,9 @@ void runRenderLoop(GLFWwindow* window)
 		// Clear contents of window
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
+
+
+		glDrawArrays(GL_TRIANGLES, 0, 3);
 
 		// Swap framebuffers and poll for events (keyboard/mouse input, window resizing, etc.)
 		glfwSwapBuffers(window);
