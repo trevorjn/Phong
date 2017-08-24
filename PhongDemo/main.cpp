@@ -12,6 +12,11 @@ const GLint WINDOW_HEIGHT = 900;
 
 const char* WINDOW_TITLE = "Phong Demo";
 
+void framebufferSizeCallback(GLFWwindow* window, GLint width, GLint height)
+{
+	glViewport(0, 0, width, height);
+}
+
 int main()
 {
 	// Initialize GLFW for windowing and event handling
@@ -41,6 +46,9 @@ int main()
 
 	// Set initial viewport dimensions
 	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+
+	// Set callbacks
+	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
 	// Render loop
 	while (!glfwWindowShouldClose(window))
