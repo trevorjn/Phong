@@ -5,6 +5,8 @@
 #define GLEW_STATIC
 #include <GL\glew.h>
 
+#include <glm\gtc\type_ptr.hpp>
+
 #include "Shader.h"
 
 const GLint INFO_LOG_SIZE = 512;
@@ -56,6 +58,36 @@ Shader::Shader(const GLchar* vert, const GLchar* frag)
 	// Delete vertex and fragment shaders now that they have been linked
 	glDeleteShader(vertShader);
 	glDeleteShader(fragShader);
+}
+
+void Shader::use() const
+{
+	glUseProgram(ID);
+}
+
+void Shader::setFloat(const char* name, GLfloat value) const
+{
+	GLuint loc = glGetUniformLocation(ID, name);
+	glUniform1f(loc, value);
+}
+
+void Shader::setVec3(const char* name, glm::vec3 value) const
+{
+	GLuint loc = glGetUniformLocation(ID, name);
+	glUniform3fv(loc, 1, glm::value_ptr(value));
+}
+
+void Shader::setVec3(const char* name, GLfloat v1, GLfloat v2, GLfloat v3)
+{
+	glm::vec3 value(v1, v2, v3);
+	GLuint loc = glGetUniformLocation(ID, name);
+	glUniform3fv(loc, 1, glm::value_ptr(value));
+}
+
+void Shader::setMat4(const char* name, glm::mat4 value) const
+{
+	GLuint loc = glGetUniformLocation(ID, name);
+	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(value));
 }
 
 const char* Shader::readShaderFile(const GLchar* fileName, const GLchar* shaderType)
