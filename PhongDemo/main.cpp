@@ -6,43 +6,37 @@
 
 #include "Shader.h"
 
-using std::cout;
-using std::endl;
-
+// Global constants
 const GLint WINDOW_WIDTH = 1600;
 const GLint WINDOW_HEIGHT = 900;
+const GLchar* WINDOW_TITLE = "Phong Demo";
 
-const char* WINDOW_TITLE = "Phong Demo";
-
-void framebufferSizeCallback(GLFWwindow* window, GLint width, GLint height)
-{
-	glViewport(0, 0, width, height);
-}
+// Function prototypes
+void framebufferSizeCallback(GLFWwindow* window, GLint width, GLint height);
+void runRenderLoop(GLFWwindow* window);
+GLFWwindow* createWindow();
+void configureGLFW();
 
 int main()
 {
-	// Initialize GLFW for windowing and event handling
-	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	// Initialize GLFW and create a window
+	configureGLFW();
+	GLFWwindow* window = createWindow();
 
-	// Create a GLFW window
-	GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, nullptr, nullptr);
+	// Check if window was successfully created
 	if (window == nullptr)
 	{
-		cout << "ERROR: failed to create GLFW window" << endl;
+		std::cout << "ERROR: failed to create GLFW window" << std::endl;
 		glfwTerminate();
 		return EXIT_FAILURE;
 	}
-	glfwMakeContextCurrent(window);
-
+	
 	// Initialize GLEW to fetch OpenGL function pointers
 	glewExperimental = GL_TRUE;
 	GLenum err = glewInit();
 	if (err != GLEW_OK)
 	{
-		cout << "ERROR: failed to initialize GLEW\n" << glewGetErrorString(err) << endl;
+		std::cout << "ERROR: failed to initialize GLEW\n" << glewGetErrorString(err) << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -52,7 +46,16 @@ int main()
 	// Set callbacks
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
-	// Render loop
+	// Loop until GLFW window is told to close
+	runRenderLoop(window);
+
+	// Destroy instance of GLFW and exit program
+	glfwTerminate();
+	return EXIT_SUCCESS;
+}
+
+void runRenderLoop(GLFWwindow* window)
+{
 	while (!glfwWindowShouldClose(window))
 	{
 		// Clear contents of window
@@ -63,8 +66,24 @@ int main()
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
+}
 
-	glfwTerminate();
+GLFWwindow* createWindow()
+{
+	GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, nullptr, nullptr);
+	glfwMakeContextCurrent(window);
+	return window;
+}
 
-	return EXIT_SUCCESS;
+void configureGLFW()
+{
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+}
+
+void framebufferSizeCallback(GLFWwindow* window, GLint width, GLint height)
+{
+	glViewport(0, 0, width, height);
 }
