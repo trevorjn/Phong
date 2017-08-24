@@ -2,6 +2,7 @@
 #include <sstream>
 #include <iostream>
 
+#define GLEW_STATIC
 #include <GL\glew.h>
 #include <glm\gtc\type_ptr.hpp>
 
@@ -15,7 +16,7 @@ Shader::Shader(const GLchar* vert, const GLchar* frag)
 	const GLchar* vertCode = readShaderFile(vert, "vertex");
 	const GLchar* fragCode = readShaderFile(frag, "fragment");
 
-	// Define these variables for checking compile and link status of shaders/program
+	// Declare these variables for checking compile and link status of shaders/program
 	GLint success;
 	GLchar infoLog[INFO_LOG_SIZE];
 
