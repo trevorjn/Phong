@@ -1,8 +1,10 @@
-#define GLEW_STATIC
+#include <iostream>
 
+#define GLEW_STATIC
 #include <GL\glew.h>
 #include <GLFW\glfw3.h>
-#include <iostream>
+
+#include "Shader.h"
 
 using std::cout;
 using std::endl;
