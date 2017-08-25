@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <memory>
 
 #include <GL\glew.h>
 #include <glm\gtc\matrix_transform.hpp>
@@ -9,7 +10,7 @@ class Shader
 {
 private:
 	GLuint ID;
-	const char* readShaderFile(const GLchar* fileName, const GLchar* shaderType);
+	std::string readShaderFile(const GLchar* fileName, const GLchar* shaderType);
 public:
 	Shader(const GLchar* vert, const GLchar* frag);
 	void use() const;

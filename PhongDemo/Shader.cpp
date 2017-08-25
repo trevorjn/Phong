@@ -13,8 +13,10 @@ const GLint INFO_LOG_SIZE = 512;
 Shader::Shader(const GLchar* vert, const GLchar* frag)
 {
 	// Source code of vertex and fragment shaders
-	const GLchar* vertCode = readShaderFile(vert, "vertex");
-	const GLchar* fragCode = readShaderFile(frag, "fragment");
+	std::string vertex = readShaderFile(vert, "vertex");
+	std::string fragment = readShaderFile(frag, "fragment");
+	const char* vertCode = vertex.c_str();
+	const char* fragCode = fragment.c_str();
 
 	// Declare these variables for checking compile and link status of shaders/program
 	GLint success;
@@ -89,7 +91,7 @@ void Shader::setMat4(const char* name, glm::mat4 value) const
 	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(value));
 }
 
-const char* Shader::readShaderFile(const GLchar* fileName, const GLchar* shaderType)
+std::string Shader::readShaderFile(const GLchar* fileName, const GLchar* shaderType)
 {
 	std::ifstream file;
 	std::string code;
@@ -100,11 +102,12 @@ const char* Shader::readShaderFile(const GLchar* fileName, const GLchar* shaderT
 		std::stringstream stream;
 		stream << file.rdbuf();
 		file.close();
+		//std::cout << "STREAM.STR:\n" << std::endl;
 		code = stream.str();
 	}
 	catch (std::ifstream::failure e)
 	{
 		std::cout << "ERROR: failed to open " << shaderType << " shader source file" << std::endl;
 	}
-	return code.c_str();
+	return code;
 }

@@ -58,12 +58,12 @@ int main()
 
 	// Create a vertex array object and bind it to the OpenGL context
 	GLuint VAO;
-	glCreateVertexArrays(1, &VAO);
+	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
 
 	// Create a vertex buffer object and bind it to the ARRAY_BUFFER target
 	GLuint VBO;
-	glCreateBuffers(1, &VBO);
+	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
 	// Buffer vertices to GPU
