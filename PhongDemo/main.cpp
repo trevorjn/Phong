@@ -19,6 +19,7 @@ void framebufferSizeCallback(GLFWwindow* window, GLint width, GLint height);
 void runRenderLoop(GLFWwindow* window);
 GLFWwindow* createWindow();
 void configureGLFW();
+void processInput(GLFWwindow* window);
 
 int main()
 {
@@ -89,6 +90,8 @@ void runRenderLoop(GLFWwindow* window)
 {
 	while (!glfwWindowShouldClose(window))
 	{
+		processInput(window);
+
 		// Clear contents of window
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -99,6 +102,14 @@ void runRenderLoop(GLFWwindow* window)
 		// Swap framebuffers and poll for events (keyboard/mouse input, window resizing, etc.)
 		glfwSwapBuffers(window);
 		glfwPollEvents();
+	}
+}
+
+void processInput(GLFWwindow* window)
+{
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+	{
+		glfwSetWindowShouldClose(window, GLFW_TRUE);
 	}
 }
 
