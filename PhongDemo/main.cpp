@@ -5,6 +5,7 @@
 #include <GLFW\glfw3.h>
 
 #include "Shader.h"
+#include "Camera.h"
 
 // Global constants
 const GLint WINDOW_WIDTH = 1600;
@@ -14,12 +15,18 @@ const GLchar* WINDOW_TITLE = "Phong Demo";
 const GLchar* LIGHTING_VERTEX_SHADER = "lighting.vert";
 const GLchar* LIGHTING_FRAGMENT_SHADER = "lighting.frag";
 
+const GLfloat FOV = 45.0f;
+
 // Function prototypes
 void framebufferSizeCallback(GLFWwindow* window, GLint width, GLint height);
-void runRenderLoop(GLFWwindow* window);
+void runRenderLoop(GLFWwindow* window, Shader& lightingShader);
 GLFWwindow* createWindow();
 void configureGLFW();
 void processInput(GLFWwindow* window);
+
+Camera cam;
+
+GLfloat lastFrameTime = 0.0f;
 
 int main()
 {
@@ -72,21 +79,20 @@ int main()
 
 	// Configure vertex attributes
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
-	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(0);	
 
-	// Create and use shader object
 	Shader lightingShader(LIGHTING_VERTEX_SHADER, LIGHTING_FRAGMENT_SHADER);
-	lightingShader.use();
 
 	// Loop until GLFW window is told to close
-	runRenderLoop(window);
+	lastFrameTime = glfwGetTime();
+	runRenderLoop(window, lightingShader);
 
 	// Destroy instance of GLFW and exit program
 	glfwTerminate();
 	return EXIT_SUCCESS;
 }
 
-void runRenderLoop(GLFWwindow* window)
+void runRenderLoop(GLFWwindow* window, Shader& lightingShader)
 {
 	while (!glfwWindowShouldClose(window))
 	{
@@ -96,6 +102,18 @@ void runRenderLoop(GLFWwindow* window)
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		glm::mat4 model;
+
+		glm::mat4 view;
+		view = cam.getViewMatrix();
+
+		glm::mat4 projection;
+		projection = glm::perspective(FOV, (GLfloat)WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
+
+		lightingShader.use();
+		lightingShader.setMat4("model", model);
+		lightingShader.setMat4("view", view);
+		lightingShader.setMat4("projection", projection);
 
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
@@ -107,9 +125,29 @@ void runRenderLoop(GLFWwindow* window)
 
 void processInput(GLFWwindow* window)
 {
+	GLfloat currentTime = glfwGetTime();
+	GLfloat deltaT = currentTime - lastFrameTime;
+	lastFrameTime = currentTime;
+
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 	{
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
+	}
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+	{
+		cam.processKeyboard(FORWARD, deltaT);
+	}
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+	{
+		cam.processKeyboard(BACKWARD, deltaT);
+	}
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+	{
+		cam.processKeyboard(LEFT, deltaT);
+	}
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+	{
+		cam.processKeyboard(RIGHT, deltaT);
 	}
 }
 
