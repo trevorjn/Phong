@@ -106,8 +106,8 @@ int main()
 void runRenderLoop(GLFWwindow* window, Shader& lightingShader, Shader& lampShader)
 {
 	glm::vec3 positions[] = {
-		glm::vec3(-3.0f, 0.0f, 0.0f),
-		glm::vec3(3.0f, 0.0f, 0.0f)
+		glm::vec3(-1.0f, 0.0f, 0.0f),
+		glm::vec3(1.0f, 0.0f, 0.0f)
 	};
 
 	glEnable(GL_DEPTH_TEST);
