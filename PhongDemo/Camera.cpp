@@ -66,3 +66,8 @@ void Camera::processMouseMove(GLfloat xoffset, GLfloat yoffset)
 
 	updateVectors();
 }
+
+vec3 Camera::getPosition() const
+{
+	return pos;
+}

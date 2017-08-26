@@ -28,4 +28,5 @@ public:
 	glm::mat4 getViewMatrix();
 	void processKeyboard(Direction dir, GLfloat deltaT);
 	void processMouseMove(GLfloat xoffset, GLfloat yoffset);
+	vec3 getPosition() const;
 };
