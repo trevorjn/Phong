@@ -36,5 +36,7 @@
   <ItemGroup>
     <None Include="lighting.vert" />
     <None Include="lighting.frag" />
+    <None Include="lamp.vert" />
+    <None Include="lamp.frag" />
   </ItemGroup>
 </Project>

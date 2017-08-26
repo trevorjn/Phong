@@ -16,12 +16,15 @@ const GLchar* WINDOW_TITLE = "Phong Demo";
 const GLchar* LIGHTING_VERTEX_SHADER = "lighting.vert";
 const GLchar* LIGHTING_FRAGMENT_SHADER = "lighting.frag";
 
+const GLchar* LAMP_VERTEX_SHADER = "lamp.vert";
+const GLchar* LAMP_FRAGMENT_SHADER = "lamp.frag";
+
 const GLfloat FOV = 45.0f;
 
 // Function prototypes
 void framebufferSizeCallback(GLFWwindow* window, GLint width, GLint height);
 void cursorPosCallback(GLFWwindow* window, GLdouble xpos, GLdouble ypos);
-void runRenderLoop(GLFWwindow* window, Shader& lightingShader);
+void runRenderLoop(GLFWwindow* window, Shader& lightingShader, Shader& lampShader);
 GLFWwindow* createWindow();
 void configureGLFW();
 void processInput(GLFWwindow* window);
@@ -85,18 +88,19 @@ int main()
 	glEnableVertexAttribArray(0);	
 
 	Shader lightingShader(LIGHTING_VERTEX_SHADER, LIGHTING_FRAGMENT_SHADER);
+	Shader lampShader(LAMP_VERTEX_SHADER, LAMP_FRAGMENT_SHADER);
 
 	// Loop until GLFW window is told to close
 	lastFrameTime = glfwGetTime();
 	glfwSetCursorPos(window, WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f);
-	runRenderLoop(window, lightingShader);
+	runRenderLoop(window, lightingShader, lampShader);
 
 	// Destroy instance of GLFW and exit program
 	glfwTerminate();
 	return EXIT_SUCCESS;
 }
 
-void runRenderLoop(GLFWwindow* window, Shader& lightingShader)
+void runRenderLoop(GLFWwindow* window, Shader& lightingShader, Shader& lampShader)
 {
 	glm::vec3 positions[] = {
 		glm::vec3(-2.0f, -1.0f, 0.0f),
@@ -123,10 +127,16 @@ void runRenderLoop(GLFWwindow* window, Shader& lightingShader)
 		lightingShader.setMat4("view", view);
 		lightingShader.setMat4("projection", projection);
 
+		lampShader.use();
+		lampShader.setMat4("view", view);
+		lampShader.setMat4("projection", projection);
+
+		lightingShader.use();
 		cubeModel = glm::translate(cubeModel, positions[0]);
 		lightingShader.setMat4("model", cubeModel);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
+		lampShader.use();
 		lampModel = glm::translate(lampModel, positions[1]);
 		lightingShader.setMat4("model", lampModel);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
