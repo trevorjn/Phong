@@ -106,8 +106,8 @@ int main()
 void runRenderLoop(GLFWwindow* window, Shader& lightingShader, Shader& lampShader)
 {
 	glm::vec3 positions[] = {
-		glm::vec3(-2.0f, -1.0f, 0.0f),
-		glm::vec3(2.0f, 1.0f, 0.0f)
+		glm::vec3(-3.0f, 0.0f, 0.0f),
+		glm::vec3(3.0f, 0.0f, 0.0f)
 	};
 
 	glEnable(GL_DEPTH_TEST);
@@ -150,7 +150,7 @@ void runRenderLoop(GLFWwindow* window, Shader& lightingShader, Shader& lampShade
 
 		lightingShader.use();
 		cubeModel = glm::translate(cubeModel, positions[0]);
-		cubeModel = glm::rotate(cubeModel, glm::radians(45 * (float)glfwGetTime()), glm::vec3(0.0f, 1.0f, 0.0f));
+		cubeModel = glm::rotate(cubeModel, glm::radians(10 * (float)glfwGetTime()), glm::vec3(-0.5f, -0.5f, 0.0f));
 		lightingShader.setMat4("model", cubeModel);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
