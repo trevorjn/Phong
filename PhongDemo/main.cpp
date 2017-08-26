@@ -98,6 +98,11 @@ int main()
 
 void runRenderLoop(GLFWwindow* window, Shader& lightingShader)
 {
+	glm::vec3 positions[] = {
+		glm::vec3(-2.0f, -1.0f, 0.0f),
+		glm::vec3(2.0f, 1.0f, 0.0f)
+	};
+
 	while (!glfwWindowShouldClose(window))
 	{
 		processInput(window);
@@ -106,7 +111,7 @@ void runRenderLoop(GLFWwindow* window, Shader& lightingShader)
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glm::mat4 model;
+		glm::mat4 lampModel, cubeModel;
 
 		glm::mat4 view;
 		view = cam.getViewMatrix();
@@ -115,10 +120,15 @@ void runRenderLoop(GLFWwindow* window, Shader& lightingShader)
 		projection = glm::perspective(FOV, (GLfloat)WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
 
 		lightingShader.use();
-		lightingShader.setMat4("model", model);
 		lightingShader.setMat4("view", view);
 		lightingShader.setMat4("projection", projection);
 
+		cubeModel = glm::translate(cubeModel, positions[0]);
+		lightingShader.setMat4("model", cubeModel);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		lampModel = glm::translate(lampModel, positions[1]);
+		lightingShader.setMat4("model", lampModel);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		// Swap framebuffers and poll for events (keyboard/mouse input, window resizing, etc.)
