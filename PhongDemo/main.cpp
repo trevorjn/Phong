@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 
 #define GLEW_STATIC
 #include <GL\glew.h>
@@ -24,9 +25,10 @@ void runRenderLoop(GLFWwindow* window, Shader& lightingShader);
 GLFWwindow* createWindow();
 void configureGLFW();
 void processInput(GLFWwindow* window);
+std::vector<GLfloat> genCubeVertices();
 
+// Global variables
 Camera cam;
-
 GLfloat lastFrameTime = 0.0f;
 GLfloat lastXPos = WINDOW_WIDTH / 2.0f;
 GLfloat lastYPos = WINDOW_HEIGHT / 2.0f;
@@ -62,12 +64,8 @@ int main()
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 	glfwSetCursorPosCallback(window, cursorPosCallback);
 
-	// Define a temporary XY-plane triangle for testing
-	GLfloat vertices[] = {
-		 0.0f,  0.5f, 0.0f,
-		-0.5f, -0.5f, 0.0f,
-		 0.5f, -0.5f, 0.0f
-	};
+	// Define the vertices of a cube
+	std::vector<GLfloat> vertexVector(genCubeVertices());
 
 	// Create a vertex array object and bind it to the OpenGL context
 	GLuint VAO;
@@ -80,7 +78,7 @@ int main()
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
 	// Buffer vertices to GPU
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 108 * sizeof(GLfloat), vertexVector.data(), GL_STATIC_DRAW);
 
 	// Configure vertex attributes
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
@@ -121,7 +119,7 @@ void runRenderLoop(GLFWwindow* window, Shader& lightingShader)
 		lightingShader.setMat4("view", view);
 		lightingShader.setMat4("projection", projection);
 
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		// Swap framebuffers and poll for events (keyboard/mouse input, window resizing, etc.)
 		glfwSwapBuffers(window);
@@ -178,6 +176,55 @@ void configureGLFW()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+}
+
+std::vector<GLfloat> genCubeVertices()
+{
+	std::vector<GLfloat> vertexVector = {
+		-0.5f, -0.5f, -0.5f,
+		0.5f, -0.5f, -0.5f,
+		0.5f,  0.5f, -0.5f,
+		0.5f,  0.5f, -0.5f,
+		-0.5f,  0.5f, -0.5f,
+		-0.5f, -0.5f, -0.5f,
+
+		-0.5f, -0.5f,  0.5f,
+		0.5f, -0.5f,  0.5f,
+		0.5f,  0.5f,  0.5f,
+		0.5f,  0.5f,  0.5f,
+		-0.5f,  0.5f,  0.5f,
+		-0.5f, -0.5f,  0.5f,
+
+		-0.5f,  0.5f,  0.5f,
+		-0.5f,  0.5f, -0.5f,
+		-0.5f, -0.5f, -0.5f,
+		-0.5f, -0.5f, -0.5f,
+		-0.5f, -0.5f,  0.5f,
+		-0.5f,  0.5f,  0.5f,
+
+		0.5f,  0.5f,  0.5f,
+		0.5f,  0.5f, -0.5f,
+		0.5f, -0.5f, -0.5f,
+		0.5f, -0.5f, -0.5f,
+		0.5f, -0.5f,  0.5f,
+		0.5f,  0.5f,  0.5f,
+
+		-0.5f, -0.5f, -0.5f,
+		0.5f, -0.5f, -0.5f,
+		0.5f, -0.5f,  0.5f,
+		0.5f, -0.5f,  0.5f,
+		-0.5f, -0.5f,  0.5f,
+		-0.5f, -0.5f, -0.5f,
+
+		-0.5f,  0.5f, -0.5f,
+		0.5f,  0.5f, -0.5f,
+		0.5f,  0.5f,  0.5f,
+		0.5f,  0.5f,  0.5f,
+		-0.5f,  0.5f,  0.5f,
+		-0.5f,  0.5f, -0.5f
+	};
+	
+	return vertexVector;
 }
 
 void cursorPosCallback(GLFWwindow* window, GLdouble xpos, GLdouble ypos)
