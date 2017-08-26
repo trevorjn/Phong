@@ -155,6 +155,14 @@ void processInput(GLFWwindow* window)
 	{
 		cam.processKeyboard(RIGHT, deltaT);
 	}
+	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+	{
+		cam.processKeyboard(UP, deltaT);
+	}
+	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+	{
+		cam.processKeyboard(DOWN, deltaT);
+	}
 }
 
 GLFWwindow* createWindow()

@@ -40,6 +40,14 @@ void Camera::processKeyboard(Direction dir, GLfloat deltaT)
 	{
 		pos -= scaledSpeed * right;
 	}
+	if (dir == UP)
+	{
+		pos += scaledSpeed * worldUp;
+	}
+	if (dir == DOWN)
+	{
+		pos -= scaledSpeed * worldUp;
+	}
 }
 
 void Camera::processMouseMove(GLfloat xoffset, GLfloat yoffset)

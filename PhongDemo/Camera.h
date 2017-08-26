@@ -7,7 +7,7 @@ using glm::vec3;
 
 enum Direction
 {
-	FORWARD, BACKWARD, LEFT, RIGHT
+	FORWARD, BACKWARD, LEFT, RIGHT, UP, DOWN
 };
 
 class Camera
