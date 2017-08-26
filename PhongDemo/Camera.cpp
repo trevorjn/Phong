@@ -1,7 +1,7 @@
 #include "Camera.h"
 
-Camera::Camera(vec3 newPos, vec3 newWorldUp, GLfloat newPitch, GLfloat newYaw, GLfloat newMoveSpeed)
-	: pos(newPos), worldUp(newWorldUp), pitch(newPitch), yaw(newYaw), moveSpeed(newMoveSpeed)
+Camera::Camera(vec3 newPos, vec3 newWorldUp, GLfloat newPitch, GLfloat newYaw, GLfloat newMoveSpeed, GLfloat newMouseSens)
+	: pos(newPos), worldUp(newWorldUp), pitch(newPitch), yaw(newYaw), moveSpeed(newMoveSpeed), mouseSens(newMouseSens)
 {
 	updateVectors();
 }
@@ -40,4 +40,21 @@ void Camera::processKeyboard(Direction dir, GLfloat deltaT)
 	{
 		pos -= scaledSpeed * right;
 	}
+}
+
+void Camera::processMouseMove(GLfloat xoffset, GLfloat yoffset)
+{
+	pitch -= mouseSens * yoffset;
+	yaw += mouseSens * xoffset;
+
+	if (pitch > 89.9f)
+	{
+		pitch = 89.9f;
+	}
+	else if (pitch < -89.9f)
+	{
+		pitch = -89.9f;
+	}
+
+	updateVectors();
 }

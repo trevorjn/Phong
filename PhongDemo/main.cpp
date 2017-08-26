@@ -19,6 +19,7 @@ const GLfloat FOV = 45.0f;
 
 // Function prototypes
 void framebufferSizeCallback(GLFWwindow* window, GLint width, GLint height);
+void cursorPosCallback(GLFWwindow* window, GLdouble xpos, GLdouble ypos);
 void runRenderLoop(GLFWwindow* window, Shader& lightingShader);
 GLFWwindow* createWindow();
 void configureGLFW();
@@ -27,6 +28,8 @@ void processInput(GLFWwindow* window);
 Camera cam;
 
 GLfloat lastFrameTime = 0.0f;
+GLfloat lastXPos = WINDOW_WIDTH / 2.0f;
+GLfloat lastYPos = WINDOW_HEIGHT / 2.0f;
 
 int main()
 {
@@ -53,9 +56,11 @@ int main()
 
 	// Set initial viewport dimensions
 	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	// Set callbacks
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+	glfwSetCursorPosCallback(window, cursorPosCallback);
 
 	// Define a temporary XY-plane triangle for testing
 	GLfloat vertices[] = {
@@ -85,6 +90,7 @@ int main()
 
 	// Loop until GLFW window is told to close
 	lastFrameTime = glfwGetTime();
+	glfwSetCursorPos(window, WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f);
 	runRenderLoop(window, lightingShader);
 
 	// Destroy instance of GLFW and exit program
@@ -164,6 +170,16 @@ void configureGLFW()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+}
+
+void cursorPosCallback(GLFWwindow* window, GLdouble xpos, GLdouble ypos)
+{
+	GLfloat xoffset = xpos - lastXPos;
+	GLfloat yoffset = ypos - lastYPos;
+	lastXPos = xpos;
+	lastYPos = ypos;
+
+	cam.processMouseMove(xoffset, yoffset);
 }
 
 void framebufferSizeCallback(GLFWwindow* window, GLint width, GLint height)

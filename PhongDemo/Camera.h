@@ -21,9 +21,11 @@ private:
 	GLfloat pitch;
 	GLfloat yaw;
 	GLfloat moveSpeed;
+	GLfloat mouseSens;
 	void updateVectors();
 public:
-	Camera(vec3 newPos = vec3(0.0f, 0.0f, 3.0f), vec3 newWorldUp = vec3(0.0f, 1.0f, 0.0f), GLfloat newPitch = 0.0f, GLfloat newYaw = -90.0f, GLfloat newMoveSpeed = 3.0f);
+	Camera(vec3 newPos = vec3(0.0f, 0.0f, 3.0f), vec3 newWorldUp = vec3(0.0f, 1.0f, 0.0f), GLfloat newPitch = 0.0f, GLfloat newYaw = -90.0f, GLfloat newMoveSpeed = 3.0f, GLfloat newMouseSens = 0.1f);
 	glm::mat4 getViewMatrix();
 	void processKeyboard(Direction dir, GLfloat deltaT);
+	void processMouseMove(GLfloat xoffset, GLfloat yoffset);
 };
