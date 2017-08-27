@@ -91,6 +91,25 @@ void Shader::setMat4(const char* name, glm::mat4 value) const
 	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(value));
 }
 
+void Shader::setMaterial(const GLchar* name, Material mat)
+{
+	std::string ambientName = name;
+	ambientName.append(".ambient");
+	setVec3(ambientName.c_str(), mat.ambient);
+
+	std::string diffuseName = name;
+	diffuseName.append(".diffuse");
+	setVec3(diffuseName.c_str(), mat.diffuse);
+
+	std::string specularName = name;
+	specularName.append(".specular");
+	setVec3(specularName.c_str(), mat.specular);
+
+	std::string shininessName = name;
+	shininessName.append(".shininess");
+	setFloat(shininessName.c_str(), mat.shininess);
+}
+
 std::string Shader::readShaderFile(const GLchar* fileName, const GLchar* shaderType)
 {
 	std::ifstream file;
@@ -102,7 +121,6 @@ std::string Shader::readShaderFile(const GLchar* fileName, const GLchar* shaderT
 		std::stringstream stream;
 		stream << file.rdbuf();
 		file.close();
-		//std::cout << "STREAM.STR:\n" << std::endl;
 		code = stream.str();
 	}
 	catch (std::ifstream::failure e)
