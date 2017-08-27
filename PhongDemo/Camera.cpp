@@ -1,7 +1,8 @@
 #include "Camera.h"
+#include <iostream>
 
-Camera::Camera(vec3 newPos, vec3 newWorldUp, GLfloat newPitch, GLfloat newYaw, GLfloat newMoveSpeed, GLfloat newMouseSens)
-	: pos(newPos), worldUp(newWorldUp), pitch(newPitch), yaw(newYaw), moveSpeed(newMoveSpeed), mouseSens(newMouseSens)
+Camera::Camera(vec3 newPos, vec3 newWorldUp, GLfloat newPitch, GLfloat newYaw, GLfloat newMoveSpeed, GLfloat newMouseSens, GLboolean newIsFocused)
+	: pos(newPos), worldUp(newWorldUp), pitch(newPitch), yaw(newYaw), moveSpeed(newMoveSpeed), mouseSens(newMouseSens), isFocused(newIsFocused)
 {
 	updateVectors();
 }
@@ -13,40 +14,46 @@ glm::mat4 Camera::getViewMatrix()
 
 void Camera::updateVectors()
 {
-	front.x = cos(glm::radians(pitch)) * cos(glm::radians(yaw));
-	front.y = sin(glm::radians(pitch));
-	front.z = cos(glm::radians(pitch)) * sin(glm::radians(yaw));
-
+	if (isFocused == GL_FALSE)
+	{
+		front.x = cos(glm::radians(pitch)) * cos(glm::radians(yaw));
+		front.y = sin(glm::radians(pitch));
+		front.z = cos(glm::radians(pitch)) * sin(glm::radians(yaw));
+	}
 	right = glm::normalize(glm::cross(front, worldUp));
 	up = glm::normalize(glm::cross(right, front));
 }
 
-void Camera::processKeyboard(Direction dir, GLfloat deltaT)
+void Camera::processKeyboard(CameraAction action, GLfloat deltaT)
 {
 	GLfloat scaledSpeed = moveSpeed * deltaT;
-	if (dir == FORWARD)
+	if (action == FORWARD)
 	{
-		pos += scaledSpeed * front;
+		moveCamera(front, scaledSpeed);
 	}
-	if (dir == BACKWARD)
+	if (action == BACKWARD)
 	{
-		pos -= scaledSpeed * front;
+		moveCamera(-front, scaledSpeed);
 	}
-	if (dir == RIGHT)
+	if (action == RIGHT)
 	{
-		pos += scaledSpeed * right;
+		moveCamera(right, scaledSpeed);
 	}
-	if (dir == LEFT)
+	if (action == LEFT)
 	{
-		pos -= scaledSpeed * right;
+		moveCamera(-right, scaledSpeed);
 	}
-	if (dir == UP)
+	if (action == UP)
 	{
-		pos += scaledSpeed * worldUp;
+		moveCamera(worldUp, scaledSpeed);
 	}
-	if (dir == DOWN)
+	if (action == DOWN)
 	{
-		pos -= scaledSpeed * worldUp;
+		moveCamera(-worldUp, scaledSpeed);
+	}
+	if (action == FOCUS)
+	{
+		isFocused = !isFocused;
 	}
 }
 
@@ -70,4 +77,20 @@ void Camera::processMouseMove(GLfloat xoffset, GLfloat yoffset)
 vec3 Camera::getPosition() const
 {
 	return pos;
+}
+
+void Camera::moveCamera(vec3 dir, GLfloat speed)
+{
+	if (isFocused == GL_TRUE)
+	{
+		vec3 tempFront = front;
+		vec3 tempPos = pos;
+		pos += dir * speed;
+		vec3 posDiff = tempPos - pos;
+		front = glm::normalize(tempFront + tempFront - pos);
+	}
+	else
+	{
+		pos += dir * speed;
+	}
 }

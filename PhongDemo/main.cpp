@@ -106,8 +106,8 @@ int main()
 void runRenderLoop(GLFWwindow* window, Shader& lightingShader, Shader& lampShader)
 {
 	glm::vec3 positions[] = {
-		glm::vec3(-1.0f, 0.0f, 0.0f),
-		glm::vec3(1.0f, 0.0f, 0.0f)
+		glm::vec3(-1.5f, 0.0f, 0.0f),
+		glm::vec3(1.5f, 0.0f, 0.0f)
 	};
 
 	glEnable(GL_DEPTH_TEST);
@@ -126,8 +126,13 @@ void runRenderLoop(GLFWwindow* window, Shader& lightingShader, Shader& lampShade
 	ruby.specular = glm::vec3(0.73, 0.63, 0.63);
 	ruby.shininess = 0.6 * 128;
 
-	// Assign "ruby" to shader's uniform member "material"
-	lightingShader.setMaterial("material", ruby);
+	Material blueRubber;
+	blueRubber.ambient = glm::vec3(0.05, 0.15, 0.35);
+	blueRubber.diffuse = glm::vec3(0.1, 0.3, 0.7);
+	blueRubber.specular = glm::vec3(0.63, 0.63, 0.63);
+	blueRubber.shininess = 0.1 * 128;
+
+	lightingShader.setMaterial("material", blueRubber);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -156,7 +161,7 @@ void runRenderLoop(GLFWwindow* window, Shader& lightingShader, Shader& lampShade
 
 		lightingShader.use();
 		cubeModel = glm::translate(cubeModel, positions[0]);
-		cubeModel = glm::rotate(cubeModel, glm::radians(10 * (float)glfwGetTime()), glm::vec3(0.0f, 1.0f, 0.0f));
+		cubeModel = glm::rotate(cubeModel, glm::radians(10 * (float)glfwGetTime()), glm::vec3(0.0f, 0.0f, 1.0f));
 		lightingShader.setMat4("model", cubeModel);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -204,6 +209,10 @@ void processInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
 	{
 		cam.processKeyboard(DOWN, deltaT);
+	}
+	if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
+	{
+		cam.processKeyboard(FOCUS, deltaT);
 	}
 }
 
