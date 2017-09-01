@@ -150,24 +150,30 @@ void runRenderLoop(GLFWwindow* window, Shader& lightingShader, Shader& lampShade
 		glm::mat4 projection;
 		projection = glm::perspective(FOV, (GLfloat)WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
 
+		// Prepare lighting shader and cube for rendering
 		lightingShader.use();
+		// Compute cube's model matrix
+		cubeModel = glm::translate(cubeModel, positions[0]);
+		cubeModel = glm::rotate(cubeModel, glm::radians(10.0f * (float)glfwGetTime()), glm::vec3(0.0f, 0.0f, 1.0f));
+		// Set lighting shader uniforms
+		lightingShader.setMat4("model", cubeModel);
 		lightingShader.setMat4("view", view);
 		lightingShader.setMat4("projection", projection);
 		lightingShader.setVec3("viewPos", cam.getPosition());
 
+		// Prepare lamp shader and lamp for rendering
 		lampShader.use();
+		// Compute lamp's model matrix
+		lampModel = glm::translate(lampModel, positions[1]);
+		// Set lamp shader uniforms
+		lampShader.setMat4("model", lampModel);
 		lampShader.setMat4("view", view);
 		lampShader.setMat4("projection", projection);
 
+		// Draw cube and lamp
 		lightingShader.use();
-		cubeModel = glm::translate(cubeModel, positions[0]);
-		cubeModel = glm::rotate(cubeModel, glm::radians(10 * (float)glfwGetTime()), glm::vec3(0.0f, 0.0f, 1.0f));
-		lightingShader.setMat4("model", cubeModel);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
-
 		lampShader.use();
-		lampModel = glm::translate(lampModel, positions[1]);
-		lightingShader.setMat4("model", lampModel);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		// Swap framebuffers and poll for events (keyboard/mouse input, window resizing, etc.)
