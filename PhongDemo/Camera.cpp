@@ -87,7 +87,7 @@ void Camera::moveCamera(vec3 dir, GLfloat speed)
 		vec3 tempPos = pos;
 		pos += dir * speed;
 		vec3 posDiff = tempPos - pos;
-		front = glm::normalize(tempFront + tempFront - pos);
+		front = glm::normalize(tempFront + posDiff - pos);
 	}
 	else
 	{
