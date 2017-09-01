@@ -19,11 +19,10 @@ const GLchar* LIGHTING_FRAGMENT_SHADER = "lighting.frag";
 const GLchar* LAMP_VERTEX_SHADER = "lamp.vert";
 const GLchar* LAMP_FRAGMENT_SHADER = "lamp.frag";
 
-const GLfloat FOV = 45.0f;
-
 // Function prototypes
 void framebufferSizeCallback(GLFWwindow* window, GLint width, GLint height);
 void cursorPosCallback(GLFWwindow* window, GLdouble xpos, GLdouble ypos);
+void mouseScrollCallback(GLFWwindow* window, GLdouble xoffset, GLdouble yoffset);
 void runRenderLoop(GLFWwindow* window, Shader& lightingShader, Shader& lampShader);
 GLFWwindow* createWindow();
 void configureGLFW();
@@ -66,6 +65,7 @@ int main()
 	// Set callbacks
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 	glfwSetCursorPosCallback(window, cursorPosCallback);
+	glfwSetScrollCallback(window, mouseScrollCallback);
 
 	// Define the vertices of a cube
 	std::vector<GLfloat> vertexVector(genCubeVertices());
@@ -148,7 +148,7 @@ void runRenderLoop(GLFWwindow* window, Shader& lightingShader, Shader& lampShade
 		view = cam.getViewMatrix();
 
 		glm::mat4 projection;
-		projection = glm::perspective(FOV, (GLfloat)WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
+		projection = cam.getProjectionMatrix((GLfloat)WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
 
 		// Prepare lighting shader and cube for rendering
 		lightingShader.use();
@@ -294,6 +294,11 @@ void cursorPosCallback(GLFWwindow* window, GLdouble xpos, GLdouble ypos)
 	lastYPos = ypos;
 
 	cam.processMouseMove(xoffset, yoffset);
+}
+
+void mouseScrollCallback(GLFWwindow* window, GLdouble xoffset, GLdouble yoffset)
+{
+	cam.processMouseScroll(yoffset);
 }
 
 void framebufferSizeCallback(GLFWwindow* window, GLint width, GLint height)

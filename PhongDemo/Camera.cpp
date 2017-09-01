@@ -1,8 +1,8 @@
 #include "Camera.h"
 #include <iostream>
 
-Camera::Camera(vec3 newPos, vec3 newWorldUp, GLfloat newPitch, GLfloat newYaw, GLfloat newMoveSpeed, GLfloat newMouseSens, GLboolean newIsFocused)
-	: pos(newPos), worldUp(newWorldUp), pitch(newPitch), yaw(newYaw), moveSpeed(newMoveSpeed), mouseSens(newMouseSens), isFocused(newIsFocused)
+Camera::Camera(vec3 newPos, vec3 newWorldUp, GLfloat newPitch, GLfloat newYaw, GLfloat newMoveSpeed, GLfloat newMouseSens, GLboolean newIsFocused, GLfloat newFov)
+	: pos(newPos), worldUp(newWorldUp), pitch(newPitch), yaw(newYaw), moveSpeed(newMoveSpeed), mouseSens(newMouseSens), isFocused(newIsFocused), fov(newFov)
 {
 	updateVectors();
 }
@@ -10,6 +10,11 @@ Camera::Camera(vec3 newPos, vec3 newWorldUp, GLfloat newPitch, GLfloat newYaw, G
 glm::mat4 Camera::getViewMatrix()
 {
 	return glm::lookAt(pos, pos + front, up);
+}
+
+glm::mat4 Camera::getProjectionMatrix(GLfloat aspectRatio, GLfloat near, GLfloat far)
+{
+	return glm::perspective(glm::radians(fov), aspectRatio, near, far);
 }
 
 void Camera::updateVectors()
@@ -22,6 +27,23 @@ void Camera::updateVectors()
 	}
 	right = glm::normalize(glm::cross(front, worldUp));
 	up = glm::normalize(glm::cross(right, front));
+}
+
+void Camera::processMouseScroll(GLfloat yoffset)
+{
+	GLfloat scrollSens = 1.0f;
+
+	fov -= scrollSens * yoffset;
+
+	// Constrain field of view to between 5 and 45 degrees
+	if (fov > 45.0f)
+	{
+		fov = 45.0f;
+	}
+	if (fov < 1.0f)
+	{
+		fov = 1.0f;
+	}
 }
 
 void Camera::processKeyboard(CameraAction action, GLfloat deltaT)
