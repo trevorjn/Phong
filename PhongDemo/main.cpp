@@ -124,7 +124,7 @@ void runRenderLoop(GLFWwindow* window, Shader& lightingShader, Shader& lampShade
 {
 	glm::vec3 positions[] = {
 		glm::vec3(-1.5f, 0.0f, 0.0f),
-		glm::vec3(1.5f, 0.0f, 0.0f)
+		glm::vec3(1.5f, 1.5f, 0.0f)
 	};
 
 	glEnable(GL_DEPTH_TEST);
@@ -164,7 +164,7 @@ void runRenderLoop(GLFWwindow* window, Shader& lightingShader, Shader& lampShade
 		lightingShader.use();
 		// Compute cube's model matrix
 		cubeModel = glm::translate(cubeModel, positions[0]);
-		cubeModel = glm::rotate(cubeModel, glm::radians(10.0f * (float)glfwGetTime()), glm::vec3(0.0f, 0.0f, 1.0f));
+		cubeModel = glm::rotate(cubeModel, glm::radians(10.0f * (float)glfwGetTime()), glm::vec3(0.0f, 1.0f, 0.0f));
 		// Set lighting shader uniforms
 		lightingShader.setMat4("model", cubeModel);
 		lightingShader.setMat4("view", view);
