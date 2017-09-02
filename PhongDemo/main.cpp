@@ -5,6 +5,9 @@
 #include <GL\glew.h>
 #include <GLFW\glfw3.h>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 #include "Shader.h"
 #include "Camera.h"
 
@@ -18,6 +21,8 @@ const GLchar* LIGHTING_FRAGMENT_SHADER = "lighting.frag";
 
 const GLchar* LAMP_VERTEX_SHADER = "lamp.vert";
 const GLchar* LAMP_FRAGMENT_SHADER = "lamp.frag";
+
+const GLchar* CONTAINER_FILE_NAME = "container2.png";
 
 // Function prototypes
 void framebufferSizeCallback(GLFWwindow* window, GLint width, GLint height);
@@ -34,6 +39,7 @@ Camera cam;
 GLfloat lastFrameTime = 0.0f;
 GLfloat lastXPos = WINDOW_WIDTH / 2.0f;
 GLfloat lastYPos = WINDOW_HEIGHT / 2.0f;
+GLuint containerTex;
 
 int main()
 {
@@ -81,17 +87,51 @@ int main()
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
 	// Buffer vertices to GPU
-	glBufferData(GL_ARRAY_BUFFER, 216 * sizeof(GLfloat), vertexVector.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertexVector.size() * sizeof(GLfloat), vertexVector.data(), GL_STATIC_DRAW);
 
 	// Configure vertex attributes
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)0);
 	glEnableVertexAttribArray(0);
 
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(1);
 
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(6 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(2);
+
+	// Create shaders
 	Shader lightingShader(LIGHTING_VERTEX_SHADER, LIGHTING_FRAGMENT_SHADER);
 	Shader lampShader(LAMP_VERTEX_SHADER, LAMP_FRAGMENT_SHADER);
+
+	// #######################
+	// # Generate texture(s) #
+	// #######################
+
+	// Generate (globally declared) texture object and bind it to OpenGL's 2D texture target
+	glGenTextures(1, &containerTex);
+	glBindTexture(GL_TEXTURE_2D, containerTex);
+	// Configure texture parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// Load image
+	GLint width, height, numChannels;
+	GLubyte* containerImageData = stbi_load(CONTAINER_FILE_NAME, &width, &height, &numChannels, 0);
+	std::cout << numChannels << std::endl;
+	if (containerImageData)
+	{
+		// Load image data into container texture and generate its mipmap
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, containerImageData);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		// Image failed to load correctly
+		std::cout << "Failed to load texture:\n" << stbi_failure_reason() << std::endl;
+	}
+	// Free container image data
+	stbi_image_free(containerImageData);
 
 	// Loop until GLFW window is told to close
 	lastFrameTime = glfwGetTime();
@@ -119,20 +159,14 @@ void runRenderLoop(GLFWwindow* window, Shader& lightingShader, Shader& lampShade
 	lightingShader.setVec3("light.specular", 1.0, 1.0, 1.0);
 	lightingShader.setVec3("light.pos", positions[1]);
 
-	// Define a material
-	Material ruby;
-	ruby.ambient = glm::vec3(0.17, 0.01, 0.01);
-	ruby.diffuse = glm::vec3(0.61, 0.04, 0.04);
-	ruby.specular = glm::vec3(0.73, 0.63, 0.63);
-	ruby.shininess = 0.6 * 128;
+	// Define materials
+	Material containerMat;
+	containerMat.diffuse = 0; // Texture unit 0
+	containerMat.specular = glm::vec3(1.0, 1.0, 1.0);
+	containerMat.shininess = 0.4 * 128;
 
-	Material blueRubber;
-	blueRubber.ambient = glm::vec3(0.05, 0.15, 0.35);
-	blueRubber.diffuse = glm::vec3(0.1, 0.3, 0.7);
-	blueRubber.specular = glm::vec3(0.63, 0.63, 0.63);
-	blueRubber.shininess = 0.1 * 128;
-
-	lightingShader.setMaterial("material", blueRubber);
+	//lightingShader.setMaterial("material", blueRubber);
+	lightingShader.setMaterial("material", containerMat);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -170,9 +204,14 @@ void runRenderLoop(GLFWwindow* window, Shader& lightingShader, Shader& lampShade
 		lampShader.setMat4("view", view);
 		lampShader.setMat4("projection", projection);
 
-		// Draw cube and lamp
+		// Draw cube
+		// Bind container texture to texture unit 0
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, containerTex);
+		// Draw container
 		lightingShader.use();
 		glDrawArrays(GL_TRIANGLES, 0, 36);
+		// Draw lamp
 		lampShader.use();
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -240,47 +279,48 @@ void configureGLFW()
 std::vector<GLfloat> genCubeVertices()
 {
 	std::vector<GLfloat> vertexVector = {
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-		0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-		0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-		0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		// positions          // normals           // texture coords
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+		0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
+		0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+		0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
 
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-		0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-		0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-		0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
+		0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
+		0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+		0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
 
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
 
-		0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-		0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-		0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-		0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-		0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+		0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+		0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+		0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+		0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+		0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+		0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
 
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-		0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-		0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-		0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+		0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
+		0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+		0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
 
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-		0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-		0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-		0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+		0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
+		0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+		0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
 	};
 	
 	return vertexVector;

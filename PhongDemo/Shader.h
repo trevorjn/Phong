@@ -8,9 +8,8 @@
 
 struct Material
 {
-	glm::vec3 ambient;
-	glm::vec3 diffuse;
 	glm::vec3 specular;
+	GLfloat diffuse;
 	GLfloat shininess;
 };
 
@@ -26,5 +25,6 @@ public:
 	void setVec3(const GLchar* name,  glm::vec3 value) const;
 	void setVec3(const GLchar* name, GLfloat v1, GLfloat v2, GLfloat v3);
 	void setMat4(const GLchar* name, glm::mat4 value) const;
+	void setUInt(const GLchar* name, GLuint value) const;
 	void setMaterial(const GLchar* name, Material mat);
 };

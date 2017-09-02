@@ -91,15 +91,17 @@ void Shader::setMat4(const char* name, glm::mat4 value) const
 	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(value));
 }
 
+void Shader::setUInt(const char* name, GLuint value) const
+{
+	GLuint loc = glGetUniformLocation(ID, name);
+	glUniform1ui(loc, value);
+}
+
 void Shader::setMaterial(const GLchar* name, Material mat)
 {
-	std::string ambientName = name;
-	ambientName.append(".ambient");
-	setVec3(ambientName.c_str(), mat.ambient);
-
 	std::string diffuseName = name;
 	diffuseName.append(".diffuse");
-	setVec3(diffuseName.c_str(), mat.diffuse);
+	setUInt(diffuseName.c_str(), mat.diffuse);
 
 	std::string specularName = name;
 	specularName.append(".specular");
