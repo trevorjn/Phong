@@ -23,6 +23,7 @@ const GLchar* LAMP_VERTEX_SHADER = "lamp.vert";
 const GLchar* LAMP_FRAGMENT_SHADER = "lamp.frag";
 
 const GLchar* CONTAINER_FILE_NAME = "container2.png";
+const GLchar* CONTAINER_SPECULAR_FILE_NAME = "container2_specular.png";
 
 // Function prototypes
 void framebufferSizeCallback(GLFWwindow* window, GLint width, GLint height);
@@ -33,6 +34,7 @@ GLFWwindow* createWindow();
 void configureGLFW();
 void processInput(GLFWwindow* window);
 std::vector<GLfloat> genCubeVertices();
+GLuint loadTexture(const GLchar* filepath);
 
 // Global variables
 Camera cam;
@@ -40,6 +42,7 @@ GLfloat lastFrameTime = 0.0f;
 GLfloat lastXPos = WINDOW_WIDTH / 2.0f;
 GLfloat lastYPos = WINDOW_HEIGHT / 2.0f;
 GLuint containerTex;
+GLuint containerSpecularTex;
 
 int main()
 {
@@ -103,35 +106,9 @@ int main()
 	Shader lightingShader(LIGHTING_VERTEX_SHADER, LIGHTING_FRAGMENT_SHADER);
 	Shader lampShader(LAMP_VERTEX_SHADER, LAMP_FRAGMENT_SHADER);
 
-	// #######################
-	// # Generate texture(s) #
-	// #######################
-
-	// Generate (globally declared) texture object and bind it to OpenGL's 2D texture target
-	glGenTextures(1, &containerTex);
-	glBindTexture(GL_TEXTURE_2D, containerTex);
-	// Configure texture parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// Load image
-	GLint width, height, numChannels;
-	GLubyte* containerImageData = stbi_load(CONTAINER_FILE_NAME, &width, &height, &numChannels, 0);
-	std::cout << numChannels << std::endl;
-	if (containerImageData)
-	{
-		// Load image data into container texture and generate its mipmap
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, containerImageData);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		// Image failed to load correctly
-		std::cout << "Failed to load texture:\n" << stbi_failure_reason() << std::endl;
-	}
-	// Free container image data
-	stbi_image_free(containerImageData);
+	// Load textures
+	containerTex = loadTexture(CONTAINER_FILE_NAME);
+	containerSpecularTex = loadTexture(CONTAINER_SPECULAR_FILE_NAME);
 
 	// Loop until GLFW window is told to close
 	lastFrameTime = glfwGetTime();
@@ -162,10 +139,9 @@ void runRenderLoop(GLFWwindow* window, Shader& lightingShader, Shader& lampShade
 	// Define materials
 	Material containerMat;
 	containerMat.diffuse = 0; // Texture unit 0
-	containerMat.specular = glm::vec3(1.0, 1.0, 1.0);
-	containerMat.shininess = 0.4 * 128;
+	containerMat.specular = 1; // Texture unit 1
+	containerMat.shininess = 0.5 * 128;
 
-	//lightingShader.setMaterial("material", blueRubber);
 	lightingShader.setMaterial("material", containerMat);
 
 	while (!glfwWindowShouldClose(window))
@@ -205,12 +181,18 @@ void runRenderLoop(GLFWwindow* window, Shader& lightingShader, Shader& lampShade
 		lampShader.setMat4("projection", projection);
 
 		// Draw cube
-		// Bind container texture to texture unit 0
+
+		// Bind container diffuse map to texture unit 0
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, containerTex);
+		// Bind container specular map to texture unit 1
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, containerSpecularTex);
+
 		// Draw container
 		lightingShader.use();
 		glDrawArrays(GL_TRIANGLES, 0, 36);
+
 		// Draw lamp
 		lampShader.use();
 		glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -344,4 +326,50 @@ void mouseScrollCallback(GLFWwindow* window, GLdouble xoffset, GLdouble yoffset)
 void framebufferSizeCallback(GLFWwindow* window, GLint width, GLint height)
 {
 	glViewport(0, 0, width, height);
+}
+
+GLuint loadTexture(const GLchar* filepath)
+{
+	GLuint id;
+	// Generate (globally declared) texture object and bind it to OpenGL's 2D texture target
+	glGenTextures(1, &id);
+	glBindTexture(GL_TEXTURE_2D, id);
+	// Configure texture parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// Load image
+	GLint width, height, numChannels;
+	GLubyte* data = stbi_load(filepath, &width, &height, &numChannels, 0);
+	if (data)
+	{
+		// Set format based on number of color channels in image
+		GLenum format;
+		if (numChannels == 3)
+		{
+			format = GL_RGB;
+		}
+		else if (numChannels == 4)
+		{
+			format = GL_RGBA;
+		}
+		else
+		{
+			std::cout << "ERROR LOADING TEXTURE: Not a valid 3 or 4 component image format" << std::endl;
+		}
+
+		// Load image data into container texture and generate its mipmap
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		// Image failed to load correctly
+		std::cout << "Failed to load texture:\n" << stbi_failure_reason() << std::endl;
+	}
+	// Free container image data
+	stbi_image_free(data);
+
+	return id;
 }

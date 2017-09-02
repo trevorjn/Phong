@@ -66,46 +66,46 @@ void Shader::use() const
 	glUseProgram(ID);
 }
 
-void Shader::setFloat(const char* name, GLfloat value) const
+void Shader::setFloat(const GLchar* name, GLfloat value) const
 {
 	GLuint loc = glGetUniformLocation(ID, name);
 	glUniform1f(loc, value);
 }
 
-void Shader::setVec3(const char* name, glm::vec3 value) const
+void Shader::setVec3(const GLchar* name, glm::vec3 value) const
 {
 	GLuint loc = glGetUniformLocation(ID, name);
 	glUniform3fv(loc, 1, glm::value_ptr(value));
 }
 
-void Shader::setVec3(const char* name, GLfloat v1, GLfloat v2, GLfloat v3)
+void Shader::setVec3(const GLchar* name, GLfloat v1, GLfloat v2, GLfloat v3)
 {
 	glm::vec3 value(v1, v2, v3);
 	GLuint loc = glGetUniformLocation(ID, name);
 	glUniform3fv(loc, 1, glm::value_ptr(value));
 }
 
-void Shader::setMat4(const char* name, glm::mat4 value) const
+void Shader::setMat4(const GLchar* name, glm::mat4 value) const
 {
 	GLuint loc = glGetUniformLocation(ID, name);
 	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(value));
 }
 
-void Shader::setUInt(const char* name, GLuint value) const
+void Shader::setInt(const GLchar* name, GLuint value) const
 {
 	GLuint loc = glGetUniformLocation(ID, name);
-	glUniform1ui(loc, value);
+	glUniform1i(loc, value);
 }
 
 void Shader::setMaterial(const GLchar* name, Material mat)
 {
 	std::string diffuseName = name;
 	diffuseName.append(".diffuse");
-	setUInt(diffuseName.c_str(), mat.diffuse);
+	setInt(diffuseName.c_str(), mat.diffuse);
 
 	std::string specularName = name;
 	specularName.append(".specular");
-	setVec3(specularName.c_str(), mat.specular);
+	setInt(specularName.c_str(), mat.specular);
 
 	std::string shininessName = name;
 	shininessName.append(".shininess");
