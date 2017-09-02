@@ -175,6 +175,7 @@ void runRenderLoop(GLFWwindow* window, Shader& lightingShader, Shader& lampShade
 		lampShader.use();
 		// Compute lamp's model matrix
 		lampModel = glm::translate(lampModel, positions[1]);
+		lampModel = glm::scale(lampModel, glm::vec3(0.5f, 0.5f, 0.5f));
 		// Set lamp shader uniforms
 		lampShader.setMat4("model", lampModel);
 		lampShader.setMat4("view", view);
