@@ -43,6 +43,7 @@ GLfloat lastXPos = WINDOW_WIDTH / 2.0f;
 GLfloat lastYPos = WINDOW_HEIGHT / 2.0f;
 GLuint containerTex;
 GLuint containerSpecularTex;
+glm::vec3 lampPos;
 
 int main()
 {
@@ -137,12 +138,17 @@ void runRenderLoop(GLFWwindow* window, Shader& lightingShader, Shader& lampShade
 
 	glEnable(GL_DEPTH_TEST);
 
+	lampPos = glm::vec3(1.0f, 2.0f, 0.0f);
+
 	// Set light vectors
 	lightingShader.use();
+	lightingShader.setVec3("light.position", lampPos);
 	lightingShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
 	lightingShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
 	lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
-	lightingShader.setVec3("light.direction", -0.2f, -1.0f, -0.3f);
+	lightingShader.setFloat("light.constant", 1.0f);
+	lightingShader.setFloat("light.linear", 0.09f);
+	lightingShader.setFloat("light.quadratic", 0.032f);
 
 	// Define materials
 	Material containerMat;
@@ -193,6 +199,17 @@ void runRenderLoop(GLFWwindow* window, Shader& lightingShader, Shader& lampShade
 			lightingShader.setMat4("model", cubeModel);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
+
+		// Configure lamp shader and render the lamp
+		lampShader.use();
+		glm::mat4 lampModel;
+		lampModel = translate(lampModel, lampPos);
+		lampModel = scale(lampModel, glm::vec3(0.2f, 0.2f, 0.2f));
+		lampShader.setMat4("model", lampModel);
+		lampShader.setMat4("view", view);
+		lampShader.setMat4("projection", projection);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
 
 		// Swap framebuffers and poll for events (keyboard/mouse input, window resizing, etc.)
 		glfwSwapBuffers(window);
