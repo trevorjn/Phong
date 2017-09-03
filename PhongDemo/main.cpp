@@ -122,19 +122,27 @@ int main()
 
 void runRenderLoop(GLFWwindow* window, Shader& lightingShader, Shader& lampShader)
 {
-	glm::vec3 positions[] = {
-		glm::vec3(-1.5f, 0.0f, 0.0f),
-		glm::vec3(1.5f, 1.5f, 0.0f)
+	glm::vec3 cubePositions[] = {
+		glm::vec3(0.0f,  0.0f,  0.0f),
+		glm::vec3(2.0f,  5.0f, -15.0f),
+		glm::vec3(-1.5f, -2.2f, -2.5f),
+		glm::vec3(-3.8f, -2.0f, -12.3f),
+		glm::vec3(2.4f, -0.4f, -3.5f),
+		glm::vec3(-1.7f,  3.0f, -7.5f),
+		glm::vec3(1.3f, -2.0f, -2.5f),
+		glm::vec3(1.5f,  2.0f, -2.5f),
+		glm::vec3(1.5f,  0.2f, -1.5f),
+		glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
 
 	glEnable(GL_DEPTH_TEST);
 
 	// Set light vectors
 	lightingShader.use();
-	lightingShader.setVec3("light.ambient", 0.2, 0.2, 0.2);
-	lightingShader.setVec3("light.diffuse", 0.5, 0.5, 0.5);
-	lightingShader.setVec3("light.specular", 1.0, 1.0, 1.0);
-	lightingShader.setVec3("light.pos", positions[1]);
+	lightingShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
+	lightingShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+	lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+	lightingShader.setVec3("light.direction", -0.2f, -1.0f, -0.3f);
 
 	// Define materials
 	Material containerMat;
@@ -152,8 +160,6 @@ void runRenderLoop(GLFWwindow* window, Shader& lightingShader, Shader& lampShade
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glm::mat4 lampModel, cubeModel;
-
 		glm::mat4 view;
 		view = cam.getViewMatrix();
 
@@ -162,24 +168,10 @@ void runRenderLoop(GLFWwindow* window, Shader& lightingShader, Shader& lampShade
 
 		// Prepare lighting shader and cube for rendering
 		lightingShader.use();
-		// Compute cube's model matrix
-		cubeModel = glm::translate(cubeModel, positions[0]);
-		cubeModel = glm::rotate(cubeModel, glm::radians(10.0f * (float)glfwGetTime()), glm::vec3(0.0f, 1.0f, 0.0f));
 		// Set lighting shader uniforms
-		lightingShader.setMat4("model", cubeModel);
 		lightingShader.setMat4("view", view);
 		lightingShader.setMat4("projection", projection);
 		lightingShader.setVec3("viewPos", cam.getPosition());
-
-		// Prepare lamp shader and lamp for rendering
-		lampShader.use();
-		// Compute lamp's model matrix
-		lampModel = glm::translate(lampModel, positions[1]);
-		lampModel = glm::scale(lampModel, glm::vec3(0.5f, 0.5f, 0.5f));
-		// Set lamp shader uniforms
-		lampShader.setMat4("model", lampModel);
-		lampShader.setMat4("view", view);
-		lampShader.setMat4("projection", projection);
 
 		// Draw cube
 
@@ -192,11 +184,15 @@ void runRenderLoop(GLFWwindow* window, Shader& lightingShader, Shader& lampShade
 
 		// Draw container
 		lightingShader.use();
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		// Draw lamp
-		lampShader.use();
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		for (GLuint i = 0; i < 10; ++i)
+		{
+			glm::mat4 cubeModel;
+			cubeModel = glm::translate(cubeModel, cubePositions[i]);
+			GLfloat angle = 20.0f * i;
+			cubeModel = glm::rotate(cubeModel, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+			lightingShader.setMat4("model", cubeModel);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 
 		// Swap framebuffers and poll for events (keyboard/mouse input, window resizing, etc.)
 		glfwSwapBuffers(window);
