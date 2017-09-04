@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <string>
 
 #define GLEW_STATIC
 #include <GL\glew.h>
@@ -136,6 +137,13 @@ void runRenderLoop(GLFWwindow* window, Shader& lightingShader, Shader& lampShade
 		glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
 
+	glm::vec3 pointLightPositions[] = {
+		glm::vec3(0.7f,  0.2f,  2.0f),
+		glm::vec3(2.3f, -3.3f, -4.0f),
+		glm::vec3(-4.0f,  2.0f, -12.0f),
+		glm::vec3(0.0f,  0.0f, -3.0f)
+	};
+
 	glEnable(GL_DEPTH_TEST);
 
 	lampPos = glm::vec3(1.0f, 2.0f, 0.0f);
@@ -157,6 +165,44 @@ void runRenderLoop(GLFWwindow* window, Shader& lightingShader, Shader& lampShade
 	containerMat.shininess = 0.5 * 128;
 
 	lightingShader.setMaterial("material", containerMat);
+
+	// directional light
+	lightingShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
+	lightingShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+	lightingShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
+	lightingShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
+	// point light 1
+	lightingShader.setVec3("pointLights[0].position", pointLightPositions[0]);
+	lightingShader.setVec3("pointLights[0].ambient", 0.05f, 0.05f, 0.05f);
+	lightingShader.setVec3("pointLights[0].diffuse", 0.8f, 0.8f, 0.8f);
+	lightingShader.setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
+	lightingShader.setFloat("pointLights[0].constant", 1.0f);
+	lightingShader.setFloat("pointLights[0].linear", 0.09);
+	lightingShader.setFloat("pointLights[0].quadratic", 0.032);
+	// point light 2
+	lightingShader.setVec3("pointLights[1].position", pointLightPositions[1]);
+	lightingShader.setVec3("pointLights[1].ambient", 0.05f, 0.05f, 0.05f);
+	lightingShader.setVec3("pointLights[1].diffuse", 0.8f, 0.8f, 0.8f);
+	lightingShader.setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
+	lightingShader.setFloat("pointLights[1].constant", 1.0f);
+	lightingShader.setFloat("pointLights[1].linear", 0.09);
+	lightingShader.setFloat("pointLights[1].quadratic", 0.032);
+	// point light 3
+	lightingShader.setVec3("pointLights[2].position", pointLightPositions[2]);
+	lightingShader.setVec3("pointLights[2].ambient", 0.05f, 0.05f, 0.05f);
+	lightingShader.setVec3("pointLights[2].diffuse", 0.8f, 0.8f, 0.8f);
+	lightingShader.setVec3("pointLights[2].specular", 1.0f, 1.0f, 1.0f);
+	lightingShader.setFloat("pointLights[2].constant", 1.0f);
+	lightingShader.setFloat("pointLights[2].linear", 0.09);
+	lightingShader.setFloat("pointLights[2].quadratic", 0.032);
+	// point light 4
+	lightingShader.setVec3("pointLights[3].position", pointLightPositions[3]);
+	lightingShader.setVec3("pointLights[3].ambient", 0.05f, 0.05f, 0.05f);
+	lightingShader.setVec3("pointLights[3].diffuse", 0.8f, 0.8f, 0.8f);
+	lightingShader.setVec3("pointLights[3].specular", 1.0f, 1.0f, 1.0f);
+	lightingShader.setFloat("pointLights[3].constant", 1.0f);
+	lightingShader.setFloat("pointLights[3].linear", 0.09);
+	lightingShader.setFloat("pointLights[3].quadratic", 0.032);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -200,16 +246,17 @@ void runRenderLoop(GLFWwindow* window, Shader& lightingShader, Shader& lampShade
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
-		// Configure lamp shader and render the lamp
-		lampShader.use();
-		glm::mat4 lampModel;
-		lampModel = translate(lampModel, lampPos);
-		lampModel = scale(lampModel, glm::vec3(0.2f, 0.2f, 0.2f));
-		lampShader.setMat4("model", lampModel);
-		lampShader.setMat4("view", view);
-		lampShader.setMat4("projection", projection);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
+		for (GLuint i = 0; i < 4; ++i)
+		{
+			glm::mat4 lampModel;
+			lampModel = glm::translate(lampModel, pointLightPositions[i]);
+			lampModel = glm::scale(lampModel, glm::vec3(0.2f, 0.2f, 0.2f));
+			lampShader.use();
+			lampShader.setMat4("model", lampModel);
+			lampShader.setMat4("view", view);
+			lampShader.setMat4("projection", projection);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 
 		// Swap framebuffers and poll for events (keyboard/mouse input, window resizing, etc.)
 		glfwSwapBuffers(window);
