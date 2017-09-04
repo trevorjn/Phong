@@ -28,21 +28,7 @@ struct PointLight
 	float quadratic;
 };
 
-struct Light
-{
-	vec3 position;
-
-	vec3 ambient;
-	vec3 diffuse;
-	vec3 specular;
-
-	float constant;
-	float linear;
-	float quadratic;
-};
-
 uniform Material material;
-uniform Light light;
 uniform vec3 viewPos;
 uniform DirLight dirLight;
 uniform PointLight pointLights[NUM_POINT_LIGHTS];
