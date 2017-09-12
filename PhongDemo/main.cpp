@@ -113,7 +113,7 @@ int main()
 	containerSpecularTex = loadTexture(CONTAINER_SPECULAR_FILE_NAME);
 
 	// Loop until GLFW window is told to close
-	lastFrameTime = glfwGetTime();
+	lastFrameTime = (GLfloat)glfwGetTime();
 	glfwSetCursorPos(window, WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f);
 	runRenderLoop(window, lightingShader, lampShader);
 
@@ -177,32 +177,32 @@ void runRenderLoop(GLFWwindow* window, Shader& lightingShader, Shader& lampShade
 	lightingShader.setVec3("pointLights[0].diffuse", 0.8f, 0.8f, 0.8f);
 	lightingShader.setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
 	lightingShader.setFloat("pointLights[0].constant", 1.0f);
-	lightingShader.setFloat("pointLights[0].linear", 0.09);
-	lightingShader.setFloat("pointLights[0].quadratic", 0.032);
+	lightingShader.setFloat("pointLights[0].linear", 0.09f);
+	lightingShader.setFloat("pointLights[0].quadratic", 0.032f);
 	// point light 2
 	lightingShader.setVec3("pointLights[1].position", pointLightPositions[1]);
 	lightingShader.setVec3("pointLights[1].ambient", 0.05f, 0.05f, 0.05f);
 	lightingShader.setVec3("pointLights[1].diffuse", 0.8f, 0.8f, 0.8f);
 	lightingShader.setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
 	lightingShader.setFloat("pointLights[1].constant", 1.0f);
-	lightingShader.setFloat("pointLights[1].linear", 0.09);
-	lightingShader.setFloat("pointLights[1].quadratic", 0.032);
+	lightingShader.setFloat("pointLights[1].linear", 0.09f);
+	lightingShader.setFloat("pointLights[1].quadratic", 0.032f);
 	// point light 3
 	lightingShader.setVec3("pointLights[2].position", pointLightPositions[2]);
 	lightingShader.setVec3("pointLights[2].ambient", 0.05f, 0.05f, 0.05f);
 	lightingShader.setVec3("pointLights[2].diffuse", 0.8f, 0.8f, 0.8f);
 	lightingShader.setVec3("pointLights[2].specular", 1.0f, 1.0f, 1.0f);
 	lightingShader.setFloat("pointLights[2].constant", 1.0f);
-	lightingShader.setFloat("pointLights[2].linear", 0.09);
-	lightingShader.setFloat("pointLights[2].quadratic", 0.032);
+	lightingShader.setFloat("pointLights[2].linear", 0.09f);
+	lightingShader.setFloat("pointLights[2].quadratic", 0.032f);
 	// point light 4
 	lightingShader.setVec3("pointLights[3].position", pointLightPositions[3]);
 	lightingShader.setVec3("pointLights[3].ambient", 0.05f, 0.05f, 0.05f);
 	lightingShader.setVec3("pointLights[3].diffuse", 0.8f, 0.8f, 0.8f);
 	lightingShader.setVec3("pointLights[3].specular", 1.0f, 1.0f, 1.0f);
 	lightingShader.setFloat("pointLights[3].constant", 1.0f);
-	lightingShader.setFloat("pointLights[3].linear", 0.09);
-	lightingShader.setFloat("pointLights[3].quadratic", 0.032);
+	lightingShader.setFloat("pointLights[3].linear", 0.09f);
+	lightingShader.setFloat("pointLights[3].quadratic", 0.032f);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -266,7 +266,7 @@ void runRenderLoop(GLFWwindow* window, Shader& lightingShader, Shader& lampShade
 
 void processInput(GLFWwindow* window)
 {
-	GLfloat currentTime = glfwGetTime();
+	GLfloat currentTime = (GLfloat)glfwGetTime();
 	GLfloat deltaT = currentTime - lastFrameTime;
 	lastFrameTime = currentTime;
 
@@ -371,17 +371,17 @@ std::vector<GLfloat> genCubeVertices()
 
 void cursorPosCallback(GLFWwindow* window, GLdouble xpos, GLdouble ypos)
 {
-	GLfloat xoffset = xpos - lastXPos;
-	GLfloat yoffset = ypos - lastYPos;
-	lastXPos = xpos;
-	lastYPos = ypos;
+	GLfloat xoffset = (GLfloat)(xpos - lastXPos);
+	GLfloat yoffset = (GLfloat)(ypos - lastYPos);
+	lastXPos = (GLfloat)xpos;
+	lastYPos = (GLfloat)ypos;
 
 	cam.processMouseMove(xoffset, yoffset);
 }
 
 void mouseScrollCallback(GLFWwindow* window, GLdouble xoffset, GLdouble yoffset)
 {
-	cam.processMouseScroll(yoffset);
+	cam.processMouseScroll((GLfloat)yoffset);
 }
 
 void framebufferSizeCallback(GLFWwindow* window, GLint width, GLint height)
