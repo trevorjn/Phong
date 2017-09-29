@@ -103,6 +103,7 @@ vec3 Camera::getPosition() const
 
 void Camera::moveCamera(vec3 dir, GLfloat speed)
 {
+	// TODO: fix jagged camera movement in focus mode when changing directions (left/right)
 	if (isFocused == GL_TRUE)
 	{
 		vec3 tempFront = front;
@@ -110,6 +111,7 @@ void Camera::moveCamera(vec3 dir, GLfloat speed)
 		pos += dir * speed;
 		vec3 posDiff = tempPos - pos;
 		front = glm::normalize(tempFront + posDiff - pos);
+		updateVectors();
 	}
 	else
 	{
